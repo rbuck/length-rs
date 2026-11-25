@@ -80,7 +80,7 @@ Errors distinguish invalid syntax, invalid numerical magnitudes, missing or unkn
 The meter is the reference unit for all conversions.
 
 | Unit | Symbol | Length in meters |
-|---|---|---:|
+| --- | --- | ---: |
 | Picometer | `pm` | 10⁻¹² |
 | Nanometer | `nm` | 10⁻⁹ |
 | Micrometer | `µm` | 10⁻⁶ |
@@ -115,7 +115,9 @@ Conversion factors are represented using `f64` and express the number of meters 
 
 Conversion from a source unit to a target unit is defined as:
 
+```text
     result = value × (source_factor / target_factor)
+```
 
 The conversion ratio is calculated before multiplication to reduce unnecessary intermediate overflow and underflow.
 
@@ -166,7 +168,7 @@ A length is represented by a decimal magnitude with an optional sign and exponen
 
 Examples:
 
-```
+```text
 2.625in
 25.4mm
 -6pt
@@ -249,11 +251,11 @@ Multiplication of two lengths is not supported because it produces a derived phy
 
 Supported operators delegate to their corresponding methods.
 
-| Operator | Equivalent method  | Return type                  |
-| -------- | ------------------ | ---------------------------- |
+| Operator | Equivalent method  | Return type                   |
+| -------- | ------------------ | ----------------------------- |
 | `a + b`  | `a.checked_add(b)` | `Result<Length, LengthError>` |
 | `a - b`  | `a.checked_sub(b)` | `Result<Length, LengthError>` |
-| `-a`     | Unary negation     | `Length`                     |
+| `-a`     | Unary negation     | `Length`                      |
 
 Scalar multiplication, scalar division, and dimensionless ratios are available through `checked_mul`, `checked_div`, and `ratio`, respectively.
 
@@ -263,13 +265,13 @@ Arithmetic operations that produce a length preserve the unit of the length oper
 
 For addition and subtraction, the right-hand operand is converted to the unit of the left-hand operand before performing the operation.
 
-| Mathematical expression | Result |
-| ----------------------- | ------ |
-| `1in + 25.4mm`          | `2in` |
-| `25.4mm + 1in`          | `50.8mm` |
-| `2in - 25.4mm`          | `1in` |
-| `1in × 2`               | `2in` |
-| `1in ÷ 2`               | `0.5in` |
+| Mathematical expression | Result              |
+| ----------------------- | ------------------- |
+| `1in + 25.4mm`          | `2in`               |
+| `25.4mm + 1in`          | `50.8mm`            |
+| `2in - 25.4mm`          | `1in`.              |
+| `1in × 2`               | `2in`               |
+| `1in ÷ 2`               | `0.5in`             |
 | `1in ÷ 25.4mm`          | `1` (dimensionless) |
 
 These examples illustrate mathematical results rather than Rust syntax and are subject to floating-point rounding.
@@ -307,10 +309,12 @@ Both `Length` and `LengthUnit` are serialized as strings:
 
 For example:
 
+```text
     width = "2.625in"
     height = "25.4mm"
     margin = "6pt"
     preferred_unit = "mm"
+```
 
 Serialization delegates to `Display`. Deserialization delegates to `FromStr`, ensuring consistent formatting and validation.
 
@@ -320,12 +324,14 @@ The serialized representation is independent of the internal conversion implemen
 
 ## 12. Implementation structure
 
+```text
     src/
     ├── lib.rs
     ├── length.rs
     ├── unit.rs
     ├── error.rs
     └── serde.rs
+```
 
 | Module   | Responsibility                                    |
 | -------- | ------------------------------------------------- |
@@ -393,7 +399,7 @@ serde = { version = "1", features = ["derive"] }
 Their domain model can then directly incorporate physical lengths:
 
 ```rust
-use length_rs::{Length, LengthUnit};
+use length::{Length, LengthUnit};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]

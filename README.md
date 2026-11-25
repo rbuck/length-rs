@@ -92,6 +92,27 @@ cargo add length-rs --features serde
 
 API documentation is available on [docs.rs](<https://docs.rs/length-rs>).
 
+### Using a shorter import name
+
+The package is published as `length-rs` and imported as `length_rs` by default.
+
+If you prefer the shorter name `length`, Cargo supports dependency renaming:
+
+```toml
+[dependencies]
+length = { package = "length-rs", version = "0.1" }
+```
+
+You can then import the library as:
+
+```rust
+use length::{Length, LengthError, LengthUnit::*};
+```
+
+This changes only the local dependency name, not the package retrieved from crates.io.
+
+All examples hereafter will use the shorter name.
+
 ## Examples
 
 ### Representing physical lengths
@@ -99,7 +120,7 @@ API documentation is available on [docs.rs](<https://docs.rs/length-rs>).
 Lengths can be constructed programmatically or parsed from text.
 
 ``` rust
-use length_rs::{Length, LengthUnit::*};
+use length::{Length, LengthUnit::*};
 
 let width = Length::new(2.625, Inch)?;
 let height: Length = "25.4mm".parse()?;
@@ -115,7 +136,7 @@ Both values have the same Rust type, despite using different units.
 Conversion is explicit and produces a new length without modifying the original.
 
 ``` rust
-use length_rs::{Length, LengthUnit::*};
+use length::{Length, LengthUnit::*};
 
 let width: Length = "2.625in".parse()?;
 let points = width.convert(Point)?;
@@ -129,7 +150,7 @@ assert!((points.value() - 189.0).abs() < 1e-12);
 Numerical values can also be converted directly without constructing a `Length`:
 
 ``` rust
-use length_rs::LengthUnit::*;
+use length::LengthUnit::*;
 
 let millimeters = Millimeter.convert(1.0, Inch);
 let points = Point.convert(2.625, Inch);
@@ -143,7 +164,7 @@ The receiving unit determines the destination of the conversion.
 Because units are runtime values, they can be selected through configuration, user input, or application logic without changing the type of a measurement.
 
 ``` rust
-use length_rs::{Length, LengthUnit};
+use length::{Length, LengthUnit};
 
 let width: Length = "2.625in".parse()?;
 let preferred_unit: LengthUnit = "mm".parse()?;
@@ -158,7 +179,7 @@ No generic type parameters, dynamic dispatch, or custom unit registry are requir
 Arithmetic operates naturally across different units of measurement.
 
 ``` rust
-use length_rs::{Length, LengthError};
+use length::{Length, LengthError};
 
 fn main() -> Result<(), LengthError> {
     let width: Length = "2.625in".parse()?;
@@ -196,7 +217,7 @@ Physical layout calculations frequently involve a combination of lengths, scalar
 Consider a sheet containing three labels, each 2.625 inches wide, separated by two 0.125-inch gutters.
 
 ``` rust
-use length_rs::{Length, LengthError};
+use length::{Length, LengthError};
 
 fn main() -> Result<(), LengthError> {
     let width: Length = "2.625in".parse()?;
@@ -233,7 +254,7 @@ Multiplying two lengths would produce an area, which is intentionally outside th
 Measurements can be rounded to physical increments rather than merely to a specified number of decimal places.
 
 ``` rust
-use length_rs::Length;
+use length::Length;
 
 let width: Length = "2.63in".parse()?;
 let increment: Length = "0.125in".parse()?;
@@ -252,7 +273,7 @@ This is useful for fabrication tolerances, printing grids, engineering measureme
 Two measurements can represent the same physical distance without having the same representation.
 
 ``` rust
-use length_rs::Length;
+use length::Length;
 
 let a: Length = "1in".parse()?;
 let b: Length = "25.4mm".parse()?;
@@ -294,7 +315,7 @@ preferred_unit = "mm"
 The corresponding Rust data model is equally straightforward:
 
 ``` rust
-use length_rs::{Length, LengthUnit};
+use length::{Length, LengthUnit};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
