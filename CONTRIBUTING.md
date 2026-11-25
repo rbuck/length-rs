@@ -42,6 +42,13 @@ cargo +1.89.0 test --no-default-features
 cargo +1.89.0 test --all-features
 ```
 
+Check that the docs pass tests:
+
+```sh
+cargo test --locked --doc --no-default-features
+cargo test --locked --doc --all-features
+```
+
 Check that the public API documentation builds successfully:
 
 ```sh
