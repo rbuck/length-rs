@@ -1,0 +1,100 @@
+name: Continuous integration
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_call:
+
+concurrency:
+  cancel-in-progress: true
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+
+permissions:
+  contents: read
+
+jobs:
+  docs-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: swatinem/rust-cache@v2
+
+      - name: Verify documentation
+        env:
+          RUSTDOCFLAGS: "-D warnings"
+        run: cargo doc --locked --no-deps --all-features
+
+  package-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: swatinem/rust-cache@v2
+
+      - name: Verify crate package
+        run: cargo package --locked --all-features
+
+  msrv-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@1.89.0
+      - uses: swatinem/rust-cache@v2
+
+      - name: Test MSRV without optional features
+        run: cargo test --locked --no-default-features
+      - name: Test MSRV with all features
+        run: cargo test --locked --all-features
+
+  fmt-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+      - name: fmt
+        run: cargo fmt --all -- --check
+
+  lint-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      - uses: swatinem/rust-cache@v2
+
+      - name: Lint without optional features
+        run: cargo clippy --locked --all-targets --no-default-features -- -D warnings
+      - name: Lint with all features
+        run: cargo clippy --locked --all-targets --all-features -- -D warnings      
+
+  security:
+    uses: ./.github/workflows/security.yml
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: swatinem/rust-cache@v2
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-llvm-cov
+
+      - name: Test without optional features
+        run: cargo test --locked --no-default-features
+      - name: Test and generate coverage report
+        run: cargo llvm-cov --locked --all-features --html --fail-under-lines 80
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v7
+        with:
+          name: rust-coverage
+          path: target/llvm-cov/html/
+          if-no-files-found: error

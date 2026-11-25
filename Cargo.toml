@@ -1,0 +1,22 @@
+[package]
+name = "length-rs"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.89"
+description = "Strongly typed, unit-preserving physical lengths."
+repository = "https://github.com/rbuck/length-rs"
+license = "MIT"
+authors = ["Robert Buck"]
+readme = "README.md"
+keywords = ["length", "units", "measurement", "conversion"]
+categories = ["science", "mathematics"]
+
+[lib]
+name = "length"
+
+[features]
+default = []
+serde = ["dep:serde"]
+
+[dependencies]
+serde = { version = "1", optional = true }

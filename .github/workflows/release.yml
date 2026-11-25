@@ -1,0 +1,54 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+concurrency:
+  cancel-in-progress: false
+  group: release-${{ github.ref }}
+
+jobs:
+  ci:
+    name: Continuous integration
+    uses: ./.github/workflows/ci.yml
+
+  check-tag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Verify tag matches package version
+        run: |
+          set -euo pipefail
+
+          tag_version="${GITHUB_REF_NAME#v}"
+
+          package_version="$(cargo metadata --locked --no-deps --format-version 1 |
+            jq -er '.packages[] | select(.name == "length") | .version')"
+
+          if [[ "$tag_version" != "$package_version" ]]; then
+            echo "Tag v$tag_version does not match length version $package_version" >&2
+            exit 1
+          fi
+
+  release:
+    needs: [ci, check-tag]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >
+          gh release create "$GITHUB_REF_NAME"
+          --repo "$GITHUB_REPOSITORY"
+          --verify-tag
+          --generate-notes
