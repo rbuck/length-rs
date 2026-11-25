@@ -31,10 +31,10 @@ jobs:
           tag_version="${GITHUB_REF_NAME#v}"
 
           package_version="$(cargo metadata --locked --no-deps --format-version 1 |
-            jq -er '.packages[] | select(.name == "length") | .version')"
+            jq -er '.packages[] | select(.name == "length-rs") | .version')"
 
           if [[ "$tag_version" != "$package_version" ]]; then
-            echo "Tag v$tag_version does not match length version $package_version" >&2
+            echo "Tag v$tag_version does not match length-rs version $package_version" >&2
             exit 1
           fi
 
